@@ -29,4 +29,10 @@ function Board() {
     );
 }
 
+
+function Deal () {
+
+    return
+}
+
 export default Board;
