@@ -110,7 +110,7 @@ function Board() {
                 subsets.map(set => [value, ...set])
             ), [[]]
         ).filter(v => v.length === 5);
- 
+
         const _bestHand1 = possibleHands1.reduce((prev, curr) =>
             handDetailsToScore(getHandDetails(prev)) < handDetailsToScore(getHandDetails(curr)) ? prev : curr
         );
