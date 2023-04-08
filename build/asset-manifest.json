@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.413392f5.css",
-    "main.js": "/static/js/main.ecfef5c6.js",
-    "static/js/787.e8829c46.chunk.js": "/static/js/787.e8829c46.chunk.js",
-    "index.html": "/index.html",
-    "main.413392f5.css.map": "/static/css/main.413392f5.css.map",
-    "main.ecfef5c6.js.map": "/static/js/main.ecfef5c6.js.map",
-    "787.e8829c46.chunk.js.map": "/static/js/787.e8829c46.chunk.js.map"
+    "main.css": "/Bitcamp2023/static/css/main.413392f5.css",
+    "main.js": "/Bitcamp2023/static/js/main.a356fdd4.js",
+    "static/js/787.e8829c46.chunk.js": "/Bitcamp2023/static/js/787.e8829c46.chunk.js",
+    "index.html": "/Bitcamp2023/index.html",
+    "main.413392f5.css.map": "/Bitcamp2023/static/css/main.413392f5.css.map",
+    "main.a356fdd4.js.map": "/Bitcamp2023/static/js/main.a356fdd4.js.map",
+    "787.e8829c46.chunk.js.map": "/Bitcamp2023/static/js/787.e8829c46.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.413392f5.css",
-    "static/js/main.ecfef5c6.js"
+    "static/js/main.a356fdd4.js"
   ]
 }
