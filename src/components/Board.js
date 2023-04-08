@@ -7,6 +7,7 @@ function Board() {
     const baseDeck = useRef([]);
     const deck = useRef([]);
     const rankToIntMap = useRef({});
+    const tied = useRef(false);
     // const [hand1, setHand1] = useState([]);
     // const [hand2, setHand2] = useState([]);
     // const [river, setRiver] = useState([]);
@@ -18,7 +19,11 @@ function Board() {
         dealing: false
     });
 
-    const [handRanking, setHandRanking] = useState("");
+    const [handRanking1, setHandRanking1] = useState("");
+    const [handRanking2, setHandRanking2] = useState("");
+    const [bestHand, setBestHand] = useState([]);
+    const [bestHand1, setBestHand1] = useState([]);
+    const [bestHand2, setBestHand2] = useState([]);
 
     // Initialize the deck
     useEffect(() => {
@@ -61,8 +66,6 @@ function Board() {
             res.push(card);
         }
 
-        console.log(res);
-
         return res;
     }
 
@@ -76,12 +79,13 @@ function Board() {
         // setHand1(getRandomCards(2));
         // setRiver(getRandomCards(5));
         const hand1 = getRandomCards(2);
+        const hand2 = getRandomCards(2);
         const river = getRandomCards(5);
 
         setBoardState({
             river: river,
             hand1: hand1,
-            hand2: null,
+            hand2: hand2,
             dealing: false
         });
     }
@@ -90,7 +94,6 @@ function Board() {
         if (!boardState.river)
             return;
 
-        console.log('here')
         const hands = ["4 of a Kind", "Straight Flush", "Straight", "Flush", "High Card",
             "1 Pair", "2 Pair", "Royal Flush", "3 of a Kind", "Full House"];
 
@@ -99,18 +102,54 @@ function Board() {
             'C': 2,
             'H': 4,
             'D': 8
-        }
+        };
 
-        setHandRanking(hands[rankPokerHand(boardState.river.map(v => rankToIntMap.current[v.rank]),
-            boardState.river.map(v => suitToNumMap[v.suit]))]);
+        let possibleHands1 = boardState.river.concat(boardState.hand1);
+        possibleHands1 = possibleHands1.reduce((subsets, value) =>
+            subsets.concat(
+                subsets.map(set => [value, ...set])
+            ), [[]]
+        ).filter(v => v.length === 5);
 
-        console.log(rankPokerHand(boardState.river.map(v => rankToIntMap.current[v.rank]),
-            boardState.river.map(v => suitToNumMap[v.suit])));
+        const _bestHand1 = possibleHands1.reduce((prev, curr) =>
+            handDetailsToScore(getHandDetails(prev)) < handDetailsToScore(getHandDetails(curr)) ? prev : curr
+        );
+
+        setHandRanking1(hands[rankPokerHand(_bestHand1.map(v => rankToIntMap.current[v.rank]),
+            _bestHand1.map(v => suitToNumMap[v.suit]))]);
+
+        setBestHand1(_bestHand1);
+        
+        let possibleHands2 = boardState.river.concat(boardState.hand2);
+        possibleHands2 = possibleHands2.reduce((subsets, value) =>
+            subsets.concat(
+                subsets.map(set => [value, ...set])
+            ), [[]]
+        ).filter(v => v.length === 5);
+
+        const _bestHand2 = possibleHands2.reduce((prev, curr) =>
+            handDetailsToScore(getHandDetails(prev)) < handDetailsToScore(getHandDetails(curr)) ? prev : curr
+        );
+
+        setHandRanking2(hands[rankPokerHand(_bestHand2.map(v => rankToIntMap.current[v.rank]),
+            _bestHand2.map(v => suitToNumMap[v.suit]))]);
+
+        setBestHand2(_bestHand2);
+
+        const hand1Score = handDetailsToScore(getHandDetails(_bestHand1));
+        const hand2Score = handDetailsToScore(getHandDetails(_bestHand2));
+        setBestHand(hand1Score < hand2Score ? _bestHand1 : _bestHand2);
+        tied.current = hand1Score === hand2Score;
+
+        // sethandRanking1(hands[rankPokerHand(boardState.river.map(v => rankToIntMap.current[v.rank]),
+        //     boardState.river.map(v => suitToNumMap[v.suit]))]);
+
+        // console.log(rankPokerHand(boardState.river.map(v => rankToIntMap.current[v.rank]),
+        //     boardState.river.map(v => suitToNumMap[v.suit])));
     }
 
     // https://www.codeproject.com/Articles/569271/A-Poker-hand-analyzer-in-JavaScript-using-bit-math
     function rankPokerHand(cs, ss) {
-        console.log("ranking " + cs + ss);
         let v, i, o, s = (1 << cs[0]) | (1 << cs[1]) | (1 << cs[2]) | (1 << cs[3]) | (1 << cs[4]);
         for (i = -1, v = o = 0; i < 5; i++, o = Math.pow(2, cs[i] * 4)) { v += o * ((v / o & 15) + 1); }
         v = v % 15 - ((s / (s & -s) === 31) || (s === 0x403c) ? 3 : 1);
@@ -120,28 +159,109 @@ function Board() {
         // document.write("Hand: " + hands[v] + (s == 0x403c ? " (Ace low)" : "") + "<br/>");
     }
 
+    // https://dev.to/miketalbot/real-world-javascript-map-reduce-solving-the-poker-hand-problem-3eie
+    const order = "23456789TJQKA"
+    function getHandDetails(hand) {
+        const cards = hand;
+        const faces = cards.map(a => String.fromCharCode([77 - order.indexOf(a.rank)])).sort();
+        const suits = cards.map(a => a.suit).sort();
+        const counts = faces.reduce(count, {});
+        const duplicates = Object.values(counts).reduce(count, {});
+        const flush = suits[0] === suits[4];
+        const first = faces[0].charCodeAt(0);
+        //Also handle low straight
+        const lowStraight = faces.join("") === "AJKLM";
+        faces[0] = lowStraight ? "N" : faces[0];
+        const straight = lowStraight || faces.every((f, index) => f.charCodeAt(0) - first === index);
+        let rank =
+            (flush && straight && 1) ||
+            (duplicates[4] && 2) ||
+            (duplicates[3] && duplicates[2] && 3) ||
+            (flush && 4) ||
+            (straight && 5) ||
+            (duplicates[3] && 6) ||
+            (duplicates[2] > 1 && 7) ||
+            (duplicates[2] && 8) ||
+            9;
+
+        return { rank, value: faces.sort(byCountFirst).join("") }
+
+        function byCountFirst(a, b) {
+            //Counts are in reverse order - bigger is better
+            const countDiff = counts[b] - counts[a]
+            if (countDiff) return countDiff // If counts don't match return
+            return b > a ? -1 : b === a ? 0 : 1
+        }
+        function count(c, a) {
+            c[a] = (c[a] || 0) + 1
+            return c
+        }
+    }
+
+    function compareHands(h1, h2) {
+        let d1 = getHandDetails(h1)
+        let d2 = getHandDetails(h2)
+
+        // return (d1.rank - d2.rank)
+        if (d1.rank === d2.rank) {
+            if (d1.value < d2.value) {
+                return "WIN"
+            } else if (d1.value > d2.value) {
+                return "LOSE"
+            } else {
+                return "DRAW"
+            }
+        }
+        return d1.rank < d2.rank ? "WIN" : "LOSE"
+    }
+
+    // Lower score is better
+    function handDetailsToScore(details) {
+        return details.rank + details.value;
+    }
+
+    function compareCards(c1, c2) {
+        return c1.rank === c2.rank && c1.suit === c2.suit;
+    }
+
+    function cardIsInHand(card, hand) {
+        return card && hand && hand.find(c => compareCards(c, card));
+    }
+
     return (
         <Grid container justifyContent={'center'} alignItems={'center'}>
             <h1>Poker Flip App</h1>
             <Grid item xs={12} sx={{ height: '45vh', display: 'flex', justifyContent: 'center' }}>
                 {boardState.river && boardState.river.map((card, i) =>
                     <Box key={i} sx={{ padding: '4px' }}>
-                        <UICard rank={card.rank} suit={card.suit} />
+                        <UICard rank={card.rank} suit={card.suit} highlighted={cardIsInHand(card, bestHand)} />
                     </Box>
                 )}
             </Grid>
-            <Grid item xs={12} sx={{ height: '25vh', display: 'flex', justifyContent: 'center' }}>
+            <Grid item xs={6} sx={{ height: '28vh', display: 'flex', justifyContent: 'center' }}>
                 {boardState.hand1 && boardState.hand1.map((card, i) =>
                     <Box key={i} sx={{ padding: '4px' }}>
-                        <UICard rank={card.rank} suit={card.suit} />
+                        <UICard rank={card.rank} suit={card.suit} highlighted={(tied.current || bestHand == bestHand1) && cardIsInHand(card, bestHand1)} />
                     </Box>
                 )}
             </Grid>
-            <Grid item xs={12} sx={{ height: '5vh', marginTop: '8px' }}>
-                <div>{handRanking}</div>
+            <Grid item xs={6} sx={{ height: '28vh', display: 'flex', justifyContent: 'center' }}>
+                {boardState.hand2 && boardState.hand2.map((card, i) =>
+                    <Box key={i} sx={{ padding: '4px' }}>
+                        <UICard rank={card.rank} suit={card.suit} highlighted={(tied.current || bestHand == bestHand2) && cardIsInHand(card, bestHand2)} />
+                    </Box>
+                )}
+            </Grid>
+            <Grid item xs={6} sx={{ height: '5vh', marginTop: '8px' }}>
+                <div>{handRanking1}</div>
+                <div>{(tied.current && 'tie') || (bestHand == bestHand1 && 'win')}</div>
+            </Grid>
+            <Grid item xs={6} sx={{ height: '5vh', marginTop: '8px' }}>
+                <div>{handRanking2}</div>
+                <div>{(tied.current && 'tie') || (bestHand == bestHand2 && 'win')}</div>
             </Grid>
             <Grid item sx={{ height: '5vh' }}>
-            <Button variant='contained' onClick={deal}>Deal</Button>
+                <Button variant='contained' onClick={deal}>Deal</Button>
             </Grid>
         </Grid>
     );
