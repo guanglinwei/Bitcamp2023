@@ -3,7 +3,7 @@ import React from 'react';
 
 function UICard({ rank, suit }) {
     return (
-        <img src={`./cards/${rank}${suit}.svg`} />
+        <img src={`./cards/${rank}${suit}.svg`} style={{ width: 'auto', height: 'calc(25vh)' }} alt={`Card: ${rank}${suit}`}/>
     );
 }
 
