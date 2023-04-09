@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import UICard from './UICard';
 import Button from '@mui/material/Button';
 import { Box, Grid } from '@mui/material';
+import { EditText } from 'react-edit-text';
 
 function Board() {
     const baseDeck = useRef([]);
@@ -118,10 +119,6 @@ function Board() {
             for (const c of deck.current)
                 c.flipped = false;
         }
-        // river = [...river, ...getRandomCards(1)];
-        // river = [...river, ...getRandomCards(1)];
-
-
     }
 
     function getPokerHandText() {
@@ -282,6 +279,7 @@ function Board() {
                 )}
             </Grid>
             <Grid item xs={6} sx={{ height: '5vh', marginTop: '8px' }}>
+                <EditText id='name1' name='name1' defaultValue='Player 1' />
                 {canDeal.current &&
                     <>
                         <div>{bestHand && handRanking1}</div>
@@ -290,6 +288,7 @@ function Board() {
                 }
             </Grid>
             <Grid item xs={6} sx={{ height: '5vh', marginTop: '8px' }}>
+                <EditText id='name2' name='name2' defaultValue='Player 2' />
                 {canDeal.current &&
                     <>
                         <div>{handRanking2}</div>
