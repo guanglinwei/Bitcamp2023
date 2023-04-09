@@ -5,3 +5,39 @@
 html {
     height: 100%;
 }
+
+.card-container .card-back {
+    visibility: visible;
+    transform: rotateY(0);
+    position: absolute;
+    top: 4%;
+    left: 4%;
+    width: auto;
+    height: calc(24vh);
+}
+
+.card-container .card-front {
+    visibility: hidden;
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+    position: relative;
+    width: auto;
+    height: calc(24vh);
+}
+
+
+.card-container .card-back.flipped {
+    visibility: hidden;
+    transform: rotateY(-180deg);
+    transition-delay: 0.5s;
+}
+
+.card-container .card-front.flipped {
+    visibility: visible;
+    transform: rotateY(0);
+}
+
+.card-container .card-back,
+.card-container .card-front {
+    transition: transform .2s ease-out;
+}
