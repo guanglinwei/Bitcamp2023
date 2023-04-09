@@ -14,6 +14,8 @@ function Board() {
     // const [river, setRiver] = useState([]);
     const canDeal = useRef(true);
 
+    const [testValue, setTestValue] = useState(false);
+
     const [boardState, setBoardState] = useState({
         river: null,
         hand1: null,
@@ -56,15 +58,34 @@ function Board() {
 
     useEffect(() => {
         if (!boardState.hand1) return;
+        canDeal.current = true;
         for (const c of boardState.hand1)
             c.flipped = true;
+
+        setTestValue(true);
     }, [boardState.hand1]);
 
     useEffect(() => {
         if (!boardState.hand2) return;
         for (const c of boardState.hand2)
             c.flipped = true;
+
+        setTestValue(true);
     }, [boardState.hand2]);
+
+    function flipHand1() {
+        setBoardState({...boardState, hand1: boardState.hand1.map(v => {
+            v.flipped = true;
+            return v;
+        })});
+    }
+
+    function flipHand2() {
+        setBoardState({...boardState, hand2: boardState.hand2.map(v => {
+            v.flipped = true;
+            return v;
+        })});
+    }
 
     function getRandomCards(num) {
         const res = [];
@@ -83,17 +104,27 @@ function Board() {
     function deal() {
         if (!canDeal.current) return;
 
-        if (!boardState.river || boardState.river.length === 0) {
+        if ((!boardState.river || boardState.river.length === 0) && (!boardState.hand1 || boardState.hand1.length === 0)) {
             const hand1 = getRandomCards(2);
             const hand2 = getRandomCards(2);
-            const river = getRandomCards(3);
+            // const river = getRandomCards(3);
 
             canDeal.current = false;
             setBoardState({
-                river: river,
+                river: null,
                 hand1: hand1,
                 hand2: hand2,
                 dealing: true
+            });
+
+            // flipHand1();
+            // flipHand2();
+        }
+        else if (!boardState.river || boardState.river.length === 0) {
+            const river = getRandomCards(3);
+            setBoardState({
+                ...boardState,
+                river: river
             });
         }
         else if (boardState.river.length === 3) {
@@ -118,6 +149,8 @@ function Board() {
             deck.current = [...baseDeck.current];
             for (const c of deck.current)
                 c.flipped = false;
+
+            setTestValue(false);
         }
     }
 
@@ -256,24 +289,24 @@ function Board() {
                     </Box>
                 )}
             </Grid>
-            <Grid item xs={6} sx={{ height: '28vh', display: 'flex', justifyContent: 'center' }}>
+            <Grid item xs={6} sx={{ height: '28vh', display: 'flex', justifyContent: 'center' }} visibility={testValue}>
                 {boardState.hand1 && boardState.hand1.map((card, i) =>
                     <Box key={i} sx={{ padding: '4px' }}>
                         <UICard
                             rank={card.rank}
                             suit={card.suit}
-                            highlighted={(tied.current || bestHand === bestHand1) && cardIsInHand(card, bestHand1)}
+                            highlighted={boardState.river && ((tied.current || bestHand === bestHand1) && cardIsInHand(card, bestHand1))}
                             flipped={card.flipped} />
                     </Box>
                 )}
             </Grid>
-            <Grid item xs={6} sx={{ height: '28vh', display: 'flex', justifyContent: 'center' }}>
+            <Grid item xs={6} sx={{ height: '28vh', display: 'flex', justifyContent: 'center' }} visibility={testValue}>
                 {boardState.hand2 && boardState.hand2.map((card, i) =>
                     <Box key={i} sx={{ padding: '4px' }}>
                         <UICard
                             rank={card.rank}
                             suit={card.suit}
-                            highlighted={(tied.current || bestHand === bestHand2) && cardIsInHand(card, bestHand2)}
+                            highlighted={boardState.river && ((tied.current || bestHand === bestHand2) && cardIsInHand(card, bestHand2))}
                             flipped={card.flipped} />
                     </Box>
                 )}

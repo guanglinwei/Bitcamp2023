@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Bitcamp2023/static/css/main.cc859b41.css",
-    "main.js": "/Bitcamp2023/static/js/main.35824622.js",
+    "main.js": "/Bitcamp2023/static/js/main.72c5dba7.js",
     "static/js/787.e8829c46.chunk.js": "/Bitcamp2023/static/js/787.e8829c46.chunk.js",
     "index.html": "/Bitcamp2023/index.html",
     "main.cc859b41.css.map": "/Bitcamp2023/static/css/main.cc859b41.css.map",
-    "main.35824622.js.map": "/Bitcamp2023/static/js/main.35824622.js.map",
+    "main.72c5dba7.js.map": "/Bitcamp2023/static/js/main.72c5dba7.js.map",
     "787.e8829c46.chunk.js.map": "/Bitcamp2023/static/js/787.e8829c46.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.cc859b41.css",
-    "static/js/main.35824622.js"
+    "static/js/main.72c5dba7.js"
   ]
 }
